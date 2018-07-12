@@ -352,6 +352,16 @@ class ServiceContainerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($c->hasAlias('alias1'));
         $this->assertTrue($c->hasAlias('alias2'));
         $this->assertFalse($c->hasAlias('alias3'));
+        // check alias/service
+        $c->set('service1', 'value1');
+        $this->assertTrue($c->has('alias2'));
+        $this->assertFalse($c->has('alias3'));
+        $c->set('service3', 'value3');
+        $c->setAlias('alias3', 'service3');
+        $this->assertTrue($c->has('alias3'));
+        $c->remove('alias3'); // "alias3" + "service3"
+        $this->assertFalse($c->has('alias3'));
+
         $c->removeAlias('alias1');
         $this->assertEquals(['alias2' => 'service1'], $c->getAliases());
     }
@@ -396,5 +406,55 @@ class ServiceContainerTest extends \PHPUnit\Framework\TestCase
         $c->register('c_alias', function () {
         });
         $this->assertFalse($c->hasAlias('c_alias'));
+    }
+
+    public function testClassDonotHaveConstructor()
+    {
+        $c = new ServiceContainer();
+        $c->registerDefinition('service1', [
+            'class' => 'Tlumx\Tests\ServiceContainer\ClassDonotHaveConstructor',
+            'args' => ['some value'],
+            'calls' => [
+                'fooMethod' => []
+            ]
+        ]);
+
+        $service1 = $c->get('service1');
+        $this->assertInstanceOf(
+            'Tlumx\Tests\ServiceContainer\ClassDonotHaveConstructor',
+            $service1
+        );
+    }
+
+    public function testClassHaveOptionalConstructorParameter()
+    {
+        $c = new ServiceContainer();
+        $c->registerDefinition('service1', [
+            'class' => 'Tlumx\Tests\ServiceContainer\ClassHaveOptionalConstructorParameter',
+            'args' => [],
+            'calls' => [
+                'setOrg' => []
+            ]
+        ]);
+        $c->registerDefinition('service2', [
+            'class' => 'Tlumx\Tests\ServiceContainer\ClassHaveOptionalConstructorParameter',
+            'args' => [],
+            'calls' => [
+                'setOrg' => ['org' => ['web' => 'tlumx.com', 'name' => 'Tlumx']]
+            ]
+        ]);
+
+        $service1 = $c->get('service1');
+        $this->assertInstanceOf(
+            'Tlumx\Tests\ServiceContainer\ClassHaveOptionalConstructorParameter',
+            $service1
+        );
+
+        $this->assertEquals($service1->name, 'Yaroslav');
+        $this->assertEquals($service1->org, 'Tlumx');
+
+        $service2 = $c->get('service2');
+        $this->assertEquals($service2->name, 'Yaroslav');
+        $this->assertEquals($service2->org, ['web' => 'tlumx.com', 'name' => 'Tlumx']);
     }
 }
