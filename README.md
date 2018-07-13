@@ -16,11 +16,11 @@ $ composer require tlumx/tlumx-servicecontainer
 
 ## Usage
 
-See: https://framework.tlumx.com/tlumx-servicecontainer/
+See: https://docs.tlumx.com/tlumx-servicecontainer/
 
 
 ## Resources
 
 - File issues at https://github.com/tlumx/tlumx-servicecontainer/issues
-- Documentation is at https://tlumx.github.io/tlumx-servicecontainer/
+- Documentation is at https://docs.tlumx.com/tlumx-servicecontainer/
 - [License File](LICENSE.md) for more information.
